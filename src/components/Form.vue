@@ -81,22 +81,29 @@
     </div>
 
     <div class="row">
-      <label for="userCitizenship" class="form-label col-lg-12">
-        Гражданство
-        <select
-          class="form-select"
-          id="userCitizenship"
-          v-model="formData.userCitizenship"
-        >
-          <option
-            v-for="citizenship in allCitizenships"
-            :key="citizenship.id"
-            v-bind:value="citizenship.nationality"
-          >
-            {{ citizenship.nationality }}
-          </option>
-        </select>
-      </label>
+      <div class="citizenshipSelector" v-click-outside="hideDropdown">
+        <label for="userCitizenship" class="form-label col-lg-12">
+          Гражданство
+          <input
+            id="userCitizenship"
+            @focus="isDropdownOpen = true"
+            class="form-control"
+            :value="formData.userCitizenship.nationality"
+        /></label>
+        <div v-if="isDropdownOpen" class="citizenshipSelectorDropdown">
+          <ul v-if="allCitizenships.length" class="list-group">
+            <li
+              v-for="citizenship in allCitizenships"
+              :key="citizenship.id"
+              class="list-group-item"
+              @click="onCitizenshipsClick(citizenship)"
+            >
+              {{ citizenship.nationality }}
+            </li>
+          </ul>
+          <div v-else class="empty">Ничего не найдено</div>
+        </div>
+      </div>
     </div>
     <div class="russionPassport" v-if="isHaveRussiaCitizenship">
       <div class="row">
@@ -240,6 +247,7 @@
 <script>
 import citizenships from "@/assets/data/citizenships.json";
 import typesOfPassports from "@/assets/data/passport-types.json";
+import clickOutside from "vue-click-outside";
 
 export default {
   data() {
@@ -252,7 +260,7 @@ export default {
         userEmail: "",
         userGender: "",
 
-        userCitizenship: "",
+        userCitizenship: {},
         russianPassport: {
           series: "",
           number: "",
@@ -271,22 +279,20 @@ export default {
       },
       allCitizenships: citizenships,
       allTypesOfPassports: typesOfPassports,
+      isDropdownOpen: false,
     };
   },
   computed: {
     isHaveRussiaCitizenship: function () {
-      if (
-        this.formData.userCitizenship.length &&
-        this.formData.userCitizenship.includes("Russia")
-      ) {
+      if (this.formData.userCitizenship.nationality === "Russia") {
         return true;
       }
       return false;
     },
     isHaveForeignCitizenship: function () {
       if (
-        this.formData.userCitizenship.length &&
-        !this.formData.userCitizenship.includes("Russia")
+        this.formData.userCitizenship.nationality !== "Russia" &&
+        this.formData.userCitizenship.nationality !== undefined
       ) {
         return true;
       }
@@ -303,6 +309,22 @@ export default {
     formSubmit() {
       console.log("UPDATE API EVENT", this.formData);
     },
+    hideDropdown() {
+      this.isDropdownOpen = false;
+    },
+    onCitizenshipsClick(selectedCitizenship) {
+      this.formData.foreignPassports = {};
+      this.formData.russianPassport = {};
+      this.formData.userCitizenship = selectedCitizenship;
+      this.isDropdownOpen = false;
+      if (selectedCitizenship.nationality !== "Russia") {
+        this.formData.foreignPassports.countryOfIssue =
+          this.formData.userCitizenship.nationality;
+      }
+    },
+  },
+  directives: {
+    clickOutside,
   },
 };
 </script>
@@ -315,7 +337,10 @@ export default {
   padding: 30px;
   box-shadow: 0 0 5px 1px rgba(12, 10, 10, 0.1);
 }
-.form div {
+.form div:not(.citizenshipSelectorDropdown) {
   margin-top: 20px;
+}
+label[for="userCitizenship"] {
+  margin-bottom: 0;
 }
 </style>

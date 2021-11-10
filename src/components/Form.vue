@@ -1,9 +1,5 @@
 <template>
   <div class="form">
-    <div class="row">
-      {{ formData }}
-    </div>
-
     <h2>Личные данные</h2>
 
     <div class="row">
@@ -91,115 +87,105 @@
           class="form-select"
           id="userCitizenship"
           v-model="formData.userCitizenship"
-          multiple
         >
           <option
             v-for="citizenship in allCitizenships"
             :key="citizenship.id"
-            v-bind:value="citizenship.id"
+            v-bind:value="citizenship.nationality"
           >
             {{ citizenship.nationality }}
           </option>
         </select>
       </label>
     </div>
-    <div class="userPassport">
-      <div class="russionPassport" v-if="isHaveRussiaCitizenship">
-        <h5>Паспорт гражданства Russia</h5>
-        <div class="row">
-          <label for="seriesOfRussianPassport" class="form-label col-lg-3"
-            >Серия
-            <input
-              id="seriesOfRussianPassport"
-              type="text"
-              class="form-control"
-              v-model="formData.russianPassport.series"
-          /></label>
-          <label for="numberOfRussianPassport" class="form-label col-lg-3"
-            >Номер<input
-              id="numberOfRussianPassport"
-              type="text"
-              class="form-control"
-              v-model="formData.russianPassport.number"
-          /></label>
-          <label for="dateOfIssueOfRussianPassport" class="form-label col-lg-6">
-            Дата выдачи
-            <input
-              type="date"
-              id="dateOfIssueOfRussianPassport"
-              class="form-control"
-              v-model="formData.russianPassport.dateOfIssue"
-            />
-          </label>
-        </div>
+    <div class="russionPassport" v-if="isHaveRussiaCitizenship">
+      <div class="row">
+        <label for="seriesOfRussianPassport" class="form-label col-lg-3"
+          >Серия
+          <input
+            id="seriesOfRussianPassport"
+            type="text"
+            class="form-control"
+            v-model="formData.russianPassport.series"
+        /></label>
+        <label for="numberOfRussianPassport" class="form-label col-lg-3"
+          >Номер<input
+            id="numberOfRussianPassport"
+            type="text"
+            class="form-control"
+            v-model="formData.russianPassport.number"
+        /></label>
+        <label for="dateOfIssueOfRussianPassport" class="form-label col-lg-6">
+          Дата выдачи
+          <input
+            type="date"
+            id="dateOfIssueOfRussianPassport"
+            class="form-control"
+            v-model="formData.russianPassport.dateOfIssue"
+          />
+        </label>
       </div>
-      <div class="foreignPassport" v-if="isHaveForeignCitizenship">
-        <h5>Иностранные паспорта</h5>
-        <div
-          v-for="citizenship in formData.userCitizenship"
-          :key="citizenship.id"
-        >
-          <div class="row">
-            <label for="userSurnameInLatin" class="form-label col-lg-6"
-              >Фамилия на латинице<input
-                id="userSurnameInLatin"
-                type="text"
-                class="form-control"
-                v-model="formData.foreignPassports[0].userSurnameInLatin"
-            /></label>
-            <label class="form-label col-lg-6" for="userName">
-              Имя на латинице
-              <input
-                class="form-control"
-                id="userNameInLatin"
-                type="text"
-                v-model="formData.foreignPassports[0].userNameInLatin"
-              />
-            </label>
-          </div>
-          <div class="row">
-            <label for="numberOfForeignPassport" class="form-label col-lg-4"
-              >Номер паспорта
-              <input
-                id="numberOfForeignPassport"
-                type="text"
-                class="form-control"
-                v-model="formData.foreignPassports[0].number"
-            /></label>
-            <label for="countryOfPassport" class="form-label col-lg-3">
-              Страна выдачи
-              <select
-                class="form-select"
-                id="countryOfPassport"
-                v-model="formData.foreignPassports[0].countryOfIssue"
-              >
-                <option
-                  v-for="citizenship in allCitizenships"
-                  :key="citizenship.id"
-                  v-bind:value="citizenship.nationality"
-                >
-                  {{ citizenship.nationality }}
-                </option>
-              </select>
-            </label>
-            <label for="typeOfPassport" class="form-label col-lg-5">
-              Тип паспорта
-              <select
-                class="form-select"
-                id="typeOfPassport"
-                v-model="formData.foreignPassports[0].type"
-              >
-                <option
-                  v-for="typeOfPassport in allTypesOfPassports"
-                  :key="typeOfPassport.id"
-                  v-bind:value="typeOfPassport.id"
-                >
-                  {{ typeOfPassport.type }}
-                </option>
-              </select>
-            </label>
-          </div>
-        </div>
+    </div>
+    <div class="foreignPassport" v-if="isHaveForeignCitizenship">
+      <div class="row">
+        <label for="userSurnameInLatin" class="form-label col-lg-6"
+          >Фамилия на латинице<input
+            id="userSurnameInLatin"
+            type="text"
+            class="form-control"
+            v-model="formData.foreignPassports.userSurnameInLatin"
+        /></label>
+        <label class="form-label col-lg-6" for="userName">
+          Имя на латинице
+          <input
+            class="form-control"
+            id="userNameInLatin"
+            type="text"
+            v-model="formData.foreignPassports.userNameInLatin"
+          />
+        </label>
+      </div>
+      <div class="row">
+        <label for="numberOfForeignPassport" class="form-label col-lg-4"
+          >Номер паспорта
+          <input
+            id="numberOfForeignPassport"
+            type="text"
+            class="form-control"
+            v-model="formData.foreignPassports.number"
+        /></label>
+        <label for="countryOfPassport" class="form-label col-lg-3">
+          Страна выдачи
+          <select
+            class="form-select"
+            id="countryOfPassport"
+            v-model="formData.foreignPassports.countryOfIssue"
+          >
+            <option
+              v-for="citizenship in allCitizenships"
+              :key="citizenship.id"
+              v-bind:value="citizenship.nationality"
+            >
+              {{ citizenship.nationality }}
+            </option>
+          </select>
+        </label>
+        <label for="typeOfPassport" class="form-label col-lg-5">
+          Тип паспорта
+          <select
+            class="form-select"
+            id="typeOfPassport"
+            v-model="formData.foreignPassports.type"
+          >
+            <option
+              v-for="typeOfPassport in allTypesOfPassports"
+              :key="typeOfPassport.id"
+              v-bind:value="typeOfPassport.type"
+            >
+              {{ typeOfPassport.type }}
+            </option>
+          </select>
+        </label>
       </div>
     </div>
     <div>Меняли ли фамилию</div>
@@ -227,6 +213,27 @@
         />
       </label>
     </div>
+    <div class="row" v-if="isUserChangeSurname">
+      <label for="previousUserSurname" class="form-label col-lg-6"
+        >Предыдущая фамилия<input
+          id="previousUserSurname"
+          type="text"
+          class="form-control"
+          v-model="formData.previousUserSurname"
+      /></label>
+      <label class="form-label col-lg-6" for="previousUserName">
+        Предыдущее имя
+        <input
+          class="form-control"
+          id="previousUserName"
+          type="text"
+          v-model="formData.previousUserName"
+        />
+      </label>
+    </div>
+    <div class="row">
+      <button @click="formSubmit" class="btn btn-secondary">Сохранить</button>
+    </div>
   </div>
 </template>
 
@@ -245,22 +252,22 @@ export default {
         userEmail: "",
         userGender: "",
 
-        userCitizenship: [],
+        userCitizenship: "",
         russianPassport: {
           series: "",
           number: "",
           dateOfIssue: "",
         },
-        foreignPassports: [
-          {
-            userSurnameInLatin: "",
-            userNameInLatin: "",
-            number: "",
-            countryOfIssue: "",
-            type: "",
-          },
-        ],
-        userChangeSurname: "false",
+        foreignPassports: {
+          userSurnameInLatin: "",
+          userNameInLatin: "",
+          number: "",
+          countryOfIssue: "",
+          type: "",
+        },
+        userChangeSurname: "true",
+        previousUserName: "",
+        previousUserSurname: "",
       },
       allCitizenships: citizenships,
       allTypesOfPassports: typesOfPassports,
@@ -269,25 +276,34 @@ export default {
   computed: {
     isHaveRussiaCitizenship: function () {
       if (
-        this.formData.userCitizenship.length > 0 &&
-        this.formData.userCitizenship.includes(8604)
+        this.formData.userCitizenship.length &&
+        this.formData.userCitizenship.includes("Russia")
       ) {
         return true;
       }
       return false;
     },
     isHaveForeignCitizenship: function () {
-      if (this.formData.userCitizenship.length > 1) {
+      if (
+        this.formData.userCitizenship.length &&
+        !this.formData.userCitizenship.includes("Russia")
+      ) {
         return true;
-      } else if (this.formData.userCitizenship.length === 0) {
-        return false;
-      } else if (!this.isHaveRussiaCitizenship) {
+      }
+      return false;
+    },
+    isUserChangeSurname: function () {
+      if (this.formData.userChangeSurname === "true") {
         return true;
       }
       return false;
     },
   },
-  methods: {},
+  methods: {
+    formSubmit() {
+      console.log("UPDATE API EVENT", this.formData);
+    },
+  },
 };
 </script>
 

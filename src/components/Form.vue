@@ -88,7 +88,7 @@
             id="userCitizenship"
             @focus="isDropdownOpen = true"
             class="form-control"
-            :value="formData.userCitizenship.nationality"
+            v-model="searchCitizenship"
         /></label>
         <div v-if="isDropdownOpen" class="citizenshipSelectorDropdown">
           <ul v-if="allCitizenships.length" class="list-group">
@@ -105,6 +105,9 @@
         </div>
       </div>
     </div>
+    <h6 v-if="isSetCitizenship">
+      Паспорт гражданина {{ formData.userCitizenship.nationality }}
+    </h6>
     <div class="russionPassport" v-if="isHaveRussiaCitizenship">
       <div class="row">
         <label for="seriesOfRussianPassport" class="form-label col-lg-3"
@@ -248,6 +251,7 @@
 import citizenships from "@/assets/data/citizenships.json";
 import typesOfPassports from "@/assets/data/passport-types.json";
 import clickOutside from "vue-click-outside";
+import { throttle, debounce } from "../helper.js";
 
 export default {
   data() {
@@ -280,6 +284,10 @@ export default {
       allCitizenships: citizenships,
       allTypesOfPassports: typesOfPassports,
       isDropdownOpen: false,
+      searchCitizenship: "",
+      isSetCitizenship: false,
+      throttledSearchCitizenship: null,
+      debouncedSearchCitizenship: null,
     };
   },
   computed: {
@@ -317,14 +325,32 @@ export default {
       this.formData.russianPassport = {};
       this.formData.userCitizenship = selectedCitizenship;
       this.isDropdownOpen = false;
+      this.isSetCitizenship = true;
       if (selectedCitizenship.nationality !== "Russia") {
         this.formData.foreignPassports.countryOfIssue =
           this.formData.userCitizenship.nationality;
       }
     },
+    getCitizenship(searchWord) {
+      console.log("FETCH SKILLS EVENT: GET SKILLS FROM API", searchWord);
+
+      this.allCitizenships = citizenships.filter((citizenship) =>
+        citizenship.nationality.includes(searchWord)
+      );
+    },
   },
   directives: {
     clickOutside,
+  },
+  watch: {
+    searchCitizenship(newValue) {
+      this.debouncedSearchCitizenship(newValue);
+    },
+  },
+  created() {
+    this.allCitizenships = citizenships;
+    this.throttledSearchCitizenship = throttle(this.getCitizenship, 2000);
+    this.debouncedSearchCitizenship = debounce(this.getCitizenship, 2000);
   },
 };
 </script>
@@ -342,5 +368,8 @@ export default {
 }
 label[for="userCitizenship"] {
   margin-bottom: 0;
+}
+h6 {
+  margin: 10px 0;
 }
 </style>

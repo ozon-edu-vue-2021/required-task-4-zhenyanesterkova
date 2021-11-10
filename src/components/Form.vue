@@ -14,7 +14,11 @@
             type="text"
             class="form-control"
             v-model="formData.userSurname"
+            @input="onSurnamelInput"
         /></label>
+        <span v-if="errors.onSurnamelInput !== ''" class="error">
+          {{ errors.onSurnamelInput }}
+        </span>
         <label class="form-label col-lg-4" for="userName">
           Имя
           <input
@@ -22,8 +26,12 @@
             id="userName"
             type="text"
             v-model="formData.userName"
+            @input="onNamelInput"
           />
         </label>
+        <span v-if="errors.onNamelInput !== ''" class="error">
+          {{ errors.onNamelInput }}
+        </span>
         <label for="userPatronymic" class="form-label col-lg-4">
           Отчество
           <input
@@ -31,8 +39,12 @@
             id="userPatronymic"
             class="form-control"
             v-model="formData.userPatronymic"
+            @input="onPatronymiclInput"
           />
         </label>
+        <span v-if="errors.onPatronymiclInput !== ''" class="error">
+          {{ errors.onPatronymiclInput }}
+        </span>
       </div>
 
       <div class="row">
@@ -43,8 +55,12 @@
             id="userDateOfBirth"
             class="form-control"
             v-model="formData.userDateOfBirth"
+            @input="onDateOfBirthlInput"
           />
         </label>
+        <span v-if="errors.onDateOfBirthlInput !== ''" class="error">
+          {{ errors.onDateOfBirthlInput }}
+        </span>
       </div>
 
       <div class="row">
@@ -55,8 +71,12 @@
             id="userEmail"
             class="form-control"
             v-model="formData.userEmail"
+            @input="onEmailInput"
           />
         </label>
+        <span v-if="errors.onEmailInput !== ''" class="error">
+          {{ errors.onEmailInput }}
+        </span>
       </div>
 
       <div>Пол</div>
@@ -122,14 +142,22 @@
               type="text"
               class="form-control"
               v-model="formData.russianPassport.series"
+              @input="onSeriesOfPassport"
           /></label>
+          <span v-if="errors.onSeriesOfPassport !== ''" class="error">
+            {{ errors.onSeriesOfPassport }}
+          </span>
           <label for="numberOfRussianPassport" class="form-label col-lg-3"
             >Номер<input
               id="numberOfRussianPassport"
               type="text"
               class="form-control"
               v-model="formData.russianPassport.number"
+              @input="onNumberOfRussianPassport"
           /></label>
+          <span v-if="errors.onNumberOfRussianPassport !== ''" class="error">
+            {{ errors.onNumberOfRussianPassport }}
+          </span>
           <label for="dateOfIssueOfRussianPassport" class="form-label col-lg-6">
             Дата выдачи
             <input
@@ -149,7 +177,11 @@
               type="text"
               class="form-control"
               v-model="formData.foreignPassports.userSurnameInLatin"
+              @input="onUserSurnameInLatin"
           /></label>
+          <span v-if="errors.onUserSurnameInLatin !== ''" class="error">
+            {{ errors.onUserSurnameInLatin }}
+          </span>
           <label class="form-label col-lg-6" for="userName">
             Имя на латинице
             <input
@@ -157,8 +189,12 @@
               id="userNameInLatin"
               type="text"
               v-model="formData.foreignPassports.userNameInLatin"
+              @input="onUserNameInLatin"
             />
           </label>
+          <span v-if="errors.onUserNameInLatin !== ''" class="error">
+            {{ errors.onUserNameInLatin }}
+          </span>
         </div>
         <div class="row">
           <label for="numberOfForeignPassport" class="form-label col-lg-4"
@@ -235,7 +271,11 @@
             type="text"
             class="form-control"
             v-model="formData.previousUserSurname"
+            @input="onPreviousSurnameInput"
         /></label>
+        <span v-if="errors.onPreviousSurnameInput !== ''" class="error">
+          {{ errors.onPreviousSurnameInput }}
+        </span>
         <label class="form-label col-lg-6" for="previousUserName">
           Предыдущее имя
           <input
@@ -243,12 +283,19 @@
             id="previousUserName"
             type="text"
             v-model="formData.previousUserName"
+            @input="onPreviousNameInput"
           />
         </label>
+        <span v-if="errors.onPreviousNameInput !== ''" class="error">
+          {{ errors.onPreviousNameInput }}
+        </span>
       </div>
       <div class="row">
         <button class="btn btn-secondary">Сохранить</button>
       </div>
+      <span v-if="messageOfErrorValidationForm === true" class="error">
+        В форме есть поля, которые заполнены некорректно
+      </span>
     </form>
   </div>
 </template>
@@ -258,6 +305,12 @@ import citizenships from "@/assets/data/citizenships.json";
 import typesOfPassports from "@/assets/data/passport-types.json";
 import clickOutside from "vue-click-outside";
 import { throttle, debounce } from "../helper.js";
+
+const EMAIL_REG_EXP = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const RUSSIAN_LETTERS = /^[а-яА-Я]+$/;
+const SERIES_OF_PASSPORT = /^[0-9]{4}$/;
+const NUMBER_OF_RUSSIAN_PASSPORT = /^[0-9]{6}$/;
+const ENGLISH_LETTERS = /^[a-zA-Z]+$/;
 
 export default {
   data() {
@@ -287,6 +340,20 @@ export default {
         previousUserName: "",
         previousUserSurname: "",
       },
+      errors: {
+        onSurnamelInput: "",
+        onNamelInput: "",
+        onPatronymiclInput: "",
+        onEmailInput: "",
+        onPreviousSurnameInput: "",
+        onPreviousNameInput: "",
+        onDateOfBirthlInput: "",
+        onSeriesOfPassport: "",
+        onNumberOfRussianPassport: "",
+        onNumberOfForeignPassport: "",
+        onUserSurnameInLatin: "",
+        onUserNameInLatin: "",
+      },
       allCitizenships: citizenships,
       allTypesOfPassports: typesOfPassports,
       isDropdownOpen: false,
@@ -294,6 +361,8 @@ export default {
       isSetCitizenship: false,
       throttledSearchCitizenship: null,
       debouncedSearchCitizenship: null,
+      isValidationForm: false,
+      messageOfErrorValidationForm: false,
     };
   },
   computed: {
@@ -321,7 +390,31 @@ export default {
   },
   methods: {
     formSubmit() {
-      console.log("UPDATE API EVENT", this.formData);
+      this.isValidationForm = true;
+      this.messageOfErrorValidationForm = false;
+      this.onDateOfBirthlInput();
+      this.onSurnamelInput();
+      this.onNamelInput();
+      this.onPatronymiclInput();
+      this.onEmailInput();
+      if (this.formData.userChangeSurname === "true") {
+        this.onPreviousNameInput();
+        this.onPreviousSurnameInput();
+      }
+
+      if (this.formData.userCitizenship.nationality === "Russia") {
+        this.onSeriesOfPassport();
+        this.onNumberOfRussianPassport();
+      } else {
+        this.onUserSurnameInLatin();
+        this.onUserNameInLatin();
+      }
+
+      if (this.isValidationForm) {
+        console.log("UPDATE API EVENT", this.formData);
+      } else {
+        this.messageOfErrorValidationForm = true;
+      }
     },
     hideDropdown() {
       this.isDropdownOpen = false;
@@ -343,6 +436,109 @@ export default {
       this.allCitizenships = citizenships.filter((citizenship) =>
         citizenship.nationality.includes(searchWord)
       );
+    },
+    onSurnamelInput() {
+      if (!RUSSIAN_LETTERS.test(this.formData.userSurname)) {
+        this.errors.onSurnamelInput = "Проверьте правильность ввода фамилии";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onSurnamelInput = "";
+      }
+    },
+    onNamelInput() {
+      if (!RUSSIAN_LETTERS.test(this.formData.userName)) {
+        this.errors.onNamelInput = "Проверьте правильность ввода имени";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onNamelInput = "";
+      }
+    },
+    onPatronymiclInput() {
+      if (!RUSSIAN_LETTERS.test(this.formData.userPatronymic)) {
+        this.errors.onPatronymiclInput =
+          "Проверьте правильность ввода отчества";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onPatronymiclInput = "";
+      }
+    },
+    onDateOfBirthlInput() {
+      this.errors.onDateOfBirthlInput = "";
+      const dateOfBirth = new Date(this.formData.userDateOfBirth);
+      const now = new Date();
+      if (now - dateOfBirth < 0) {
+        this.errors.onDateOfBirthlInput =
+          "Дата рождения не может быть позднее, чем сегодня";
+        this.isValidationForm = false;
+      }
+    },
+    onEmailInput() {
+      if (!EMAIL_REG_EXP.test(this.formData.userEmail)) {
+        this.errors.onEmailInput = "Проверьте правильность ввода email";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onEmailInput = "";
+      }
+    },
+    onPreviousSurnameInput() {
+      if (!RUSSIAN_LETTERS.test(this.formData.previousUserSurname)) {
+        this.errors.onPreviousSurnameInput =
+          "Проверьте правильность ввода предыдущей фамилии";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onPreviousSurnameInput = "";
+      }
+    },
+    onPreviousNameInput() {
+      if (!RUSSIAN_LETTERS.test(this.formData.previousUserName)) {
+        this.errors.onPreviousNameInput =
+          "Проверьте правильность ввода предыдущего имени";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onPreviousNameInput = "";
+      }
+    },
+    onSeriesOfPassport() {
+      if (!SERIES_OF_PASSPORT.test(this.formData.russianPassport.series)) {
+        this.errors.onSeriesOfPassport =
+          "Проверьте правильность ввода серии паспорта";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onSeriesOfPassport = "";
+      }
+    },
+    onNumberOfRussianPassport() {
+      if (
+        !NUMBER_OF_RUSSIAN_PASSPORT.test(this.formData.russianPassport.number)
+      ) {
+        this.errors.onNumberOfRussianPassport =
+          "Проверьте правильность ввода номера паспорта";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onNumberOfRussianPassport = "";
+      }
+    },
+    onUserSurnameInLatin() {
+      if (
+        !ENGLISH_LETTERS.test(this.formData.foreignPassports.userSurnameInLatin)
+      ) {
+        this.errors.onUserSurnameInLatin =
+          "Проверьте правильность ввода фамилии на латинице";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onUserSurnameInLatin = "";
+      }
+    },
+    onUserNameInLatin() {
+      if (
+        !ENGLISH_LETTERS.test(this.formData.foreignPassports.userNameInLatin)
+      ) {
+        this.errors.onUserNameInLatin =
+          "Проверьте правильность ввода имени на латинице";
+        this.isValidationForm = false;
+      } else {
+        this.errors.onUserNameInLatin = "";
+      }
     },
   },
   directives: {
@@ -377,5 +573,9 @@ label[for="userCitizenship"] {
 }
 h6 {
   margin: 10px 0;
+}
+.error {
+  color: red;
+  font-size: 12px;
 }
 </style>
